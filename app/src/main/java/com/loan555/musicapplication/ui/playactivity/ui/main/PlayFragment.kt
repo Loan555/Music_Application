@@ -3,7 +3,6 @@ package com.loan555.musicapplication.ui.playactivity.ui.main
 import android.content.Intent
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.loan555.musicapplication.R
 import com.loan555.musicapplication.databinding.PlayFragmentBinding
 import com.loan555.musicapplication.model.Playlist
-import com.loan555.musicapplication.ui.mainactivity.activity.myTag
-import com.loan555.musicapplication.ui.playactivity.PlayActivity
 import com.loan555.musicapplication.ui.playsongactivity.PlaySongActivity
 
 class PlayFragment : Fragment() {
@@ -54,12 +51,12 @@ class PlayFragment : Fragment() {
         binding.recycleSong.adapter = adapter
     }
 
-    private val onItemClick: (Playlist) -> Unit = {
+    private val onItemClick: (Int) -> Unit = {
         //ham call back
         val intent = Intent(this.requireContext(), PlaySongActivity::class.java)
-//        val bundle = Bundle()
-//        bundle.putSerializable("playlist", it)
-//        intent.putExtra("play_playlist", bundle)
+        val bundle = Bundle()
+        bundle.putSerializable("play", playlist.songs[it])
+        intent.putExtra("play_playlist", bundle)
         startActivity(intent)
     }
 }

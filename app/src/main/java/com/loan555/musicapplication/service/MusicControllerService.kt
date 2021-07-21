@@ -12,6 +12,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
@@ -23,6 +24,7 @@ import com.loan555.musicapplication.model.SongCustom
 import com.loan555.musicapplication.ui.mainactivity.activity.myTag
 import kotlinx.coroutines.*
 import java.io.IOException
+import kotlin.random.Random
 
 const val ACTION_PAUSE = -1
 const val ACTION_RESUME = 1
@@ -40,6 +42,13 @@ const val KEY_ACTION_MUSIC = "action_music"
 
 class MusicControllerService : Service() {
     var isPlaying = false
+
+    /**
+    0: not loop
+    1: loop
+    2: shupf
+    3: loop one
+     */
     var statePlay: Int = 0
     private lateinit var br: BroadcastReceiver
     private val binder = MusicControllerBinder()
@@ -183,18 +192,26 @@ class MusicControllerService : Service() {
             setAudioStreamType(AudioManager.STREAM_MUSIC)
             try {
                 setDataSource(applicationContext, uri)
-            }catch (e: IOException){
-                Log.e(myTag,"error play media: ${e.message}")
-            }
-            setOnCompletionListener {
-                playNext()
+            } catch (e: IOException) {
+                Log.e(myTag, "error play media: ${e.message}")
             }
             isLooping = looping
-            prepareAsync()
-            setOnPreparedListener { start() }
+            try {
+                prepareAsync()
+            }catch (e: IllegalStateException){
+                Log.e("bbb","error prepareAsync ${e.message}")
+            }
+            setOnPreparedListener {
+                Log.d("bbb","music on setOnPreparedListener")
+                setOnCompletionListener {
+                    Log.d("bbb","music on completion")
+                    playNextAuto()
+                }
+                start()
+            }
             setOnErrorListener { mp, _, _ ->
-                mp.reset()
-                Log.e(myTag,"error get data")
+//                mp.reset()
+                Log.e("bbb", "error get setOnErrorListener")
                 false
             }
         }
@@ -241,15 +258,6 @@ class MusicControllerService : Service() {
         sendBroadcast(intent)
     }
 
-    private fun playNext(): String? {
-        Toast.makeText(this, "next", Toast.LENGTH_SHORT).show()
-        songPos++;
-        if (songPos == songs.size) songPos = 0
-        this.playSong(songPos)
-        songIDPlaying = songs[songPos].uri
-        return songIDPlaying
-    }
-
     private fun playPrev(): String? {
         Toast.makeText(this, "back", Toast.LENGTH_SHORT).show()
         songPos--
@@ -287,5 +295,69 @@ class MusicControllerService : Service() {
 
     fun callServiceDemo(str: String) {
         Log.d(myTag, " call service demo $str")
+    }
+
+    fun setStartPlay(state: Int) {
+        this.statePlay = state
+        if (statePlay != 3) {
+            looping = false
+            player?.isLooping = false
+        }
+        Log.d(myTag, "state play = $statePlay")
+    }
+
+    private fun playNext() {
+        when (statePlay) {
+            2 -> {
+                var newPos = songPos
+                while (songs.size > 1 && newPos == songPos) {
+                    newPos = Random.nextInt(songs.size)
+                }
+                if (newPos == songPos) {
+                    sentMyBroadcast(ACTION_PAUSE)
+                } else {
+                    songPos = newPos
+                    playSong(songPos)
+                }
+            }
+            else -> {
+                songPos++;
+                if (songPos == songs.size) songPos = 0
+                this.playSong(songPos)
+            }
+        }
+    }
+
+    private fun playNextAuto() {
+        when (statePlay) {
+            0 -> {
+                if (songPos < songs.size - 1) {
+                    songPos++
+                    playSong(songPos)
+                } else sentMyBroadcast(ACTION_PAUSE)
+            }
+            2 -> {
+                var newPos = songPos
+                while (songs.size > 1 && newPos == songPos) {
+                    newPos = Random.nextInt(songs.size)
+                }
+                if (newPos == songPos) {
+                    sentMyBroadcast(ACTION_PAUSE)
+                } else {
+                    songPos = newPos
+                    playSong(songPos)
+                }
+            }
+            3 -> {
+                player?.isLooping = true
+                looping = true
+                player?.start()
+            }
+            else -> {
+                songPos++;
+                if (songPos == songs.size) songPos = 0
+                this.playSong(songPos)
+            }
+        }
     }
 }

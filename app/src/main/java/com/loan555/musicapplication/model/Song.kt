@@ -11,10 +11,9 @@ import android.os.Build
 import android.os.Environment
 import android.util.Log
 import android.util.Size
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.lifecycle.MutableLiveData
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import com.loan555.musicapplication.ui.mainactivity.activity.myTag
 import java.io.File
@@ -23,15 +22,18 @@ import java.io.Serializable
 import java.net.HttpURLConnection
 import java.net.URL
 
+@Entity(tableName = "songs_favorite_table")
 data class SongCustom(
-    val id: String,
-    val name: String,
-    val artistsNames: String,
-    val thumbnail: String?,
-    val duration: Long,
-    val title: String,
-    val uri: String
+    @PrimaryKey
+    @ColumnInfo(name = "id_col") val id: String,
+    @ColumnInfo(name = "name_col") val name: String,
+    @ColumnInfo(name = "artistsNames_col") val artistsNames: String,
+    @ColumnInfo(name = "thumbnail_col") val thumbnail: String?,
+    @ColumnInfo(name = "duration_col") val duration: Long,
+    @ColumnInfo(name = "name_col") val title: String,
+    @ColumnInfo(name = "title_col") val uri: String
 ) : Serializable {
+
     fun timeToString(): String {
         val sumSeconds = duration
         val hours = sumSeconds / 3600
@@ -74,7 +76,7 @@ data class SongCustom(
         } else null
     }
 
-    private fun downLoad(item: SongCustom, context: Context) {
+    fun downLoad(context: Context) {
         var dir = Environment.DIRECTORY_MUSIC
         dir += "/klp"
         val fileDir = File(dir)
@@ -84,10 +86,10 @@ data class SongCustom(
         // Download File
         // Download File
         val request = DownloadManager.Request(
-            Uri.parse(item.uri)
+            Uri.parse(this.uri)
         )
-        request.setDescription(item.name)
-        request.setTitle(item.title)
+        request.setDescription(this.name)
+        request.setTitle(this.title)
         // in order for this if to run, you must use the android 3.2 to
         // compile your app
         // in order for this if to run, you must use the android 3.2 to

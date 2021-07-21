@@ -69,6 +69,12 @@ class MainActivity : FragmentActivity() {
         })
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(viewModel.br)
+        unbindService(viewModel.conn)
+    }
+
     override fun onBackPressed() {
         if (binding.viewPager.currentItem == 0) {
             super.onBackPressed()

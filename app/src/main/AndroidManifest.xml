@@ -15,7 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicApplication"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.playsongactivity.PlaySongActivity"></activity>
+        <activity
+            android:label=""
+            android:name=".ui.playsongactivity.PlaySongActivity"
+            android:parentActivityName=".ui.mainactivity.activity.MainActivity"></activity>
         <activity android:name=".ui.createplaylistactivity.CreatePlaylistActivity" />
         <activity android:name=".ui.playactivity.PlayActivity" />
         <activity android:name=".ui.mainactivity.activity.MainActivity">
@@ -25,7 +28,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".service.MusicControllerService"/>
+
+        <service android:name=".service.MusicControllerService" />
     </application>
 
 </manifest>

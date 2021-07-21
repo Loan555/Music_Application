@@ -29,7 +29,7 @@ class SongAdapter(
     private val context: Context,
     private val application: Application?,
     private val playlist: Playlist,
-    private val onClick: (Playlist) -> Unit
+    private val onClick: (Int) -> Unit
 ) :
     RecyclerView.Adapter<SongAdapter.PlaylistViewHolder>() {
 
@@ -80,7 +80,7 @@ class SongAdapter(
                         Glide.with(context).load(R.drawable.ic_music_note).into(imgNote)
                 }
             }
-            layoutItem.setOnClickListener { onClick(playlist) }
+            layoutItem.setOnClickListener { onClick(layoutPosition) }
         }
     }
 
